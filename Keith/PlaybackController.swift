@@ -201,7 +201,6 @@ public class PlaybackController: NSObject {
         super.init()
         
         try? audioSession.setCategory(AVAudioSessionCategoryPlayback)
-        try? audioSession.setMode(AVAudioSessionModeSpokenAudio)
         
         if #available(iOS 10, *) {
             // Since we are using a custom asset resource delegate, disable `automaticallyWaitsToMinimizeStalling` as recommended by Apple in the documentation.
