@@ -1,0 +1,7 @@
+
+xcodebuild \
+  -project Keith.xcodeproj \
+  -scheme Keith \
+  -sdk iphonesimulator \
+  -destination 'platform=iOS Simulator,name=iPhone SE,OS=10.2' \
+  test
