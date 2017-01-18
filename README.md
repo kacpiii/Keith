@@ -88,7 +88,7 @@ Observe the following notifications to monitor changes in the playback state.
 
 ## Name
 
-Keith's name is homage to Keith Richards, one of the greatest guitar players that ever existed and the embodiment of rock 'n roll itself.
+Keith's name is a homage to Keith Richards, one of the greatest guitar players that ever existed and the embodiment of rock 'n roll itself.
 
 > *If you've gotta think about being cool, you ain' cool*
 >
