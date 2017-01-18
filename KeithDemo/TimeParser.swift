@@ -45,7 +45,7 @@ struct TimeParser {
         comps.minute = Int(minutes)
         comps.second = Int(seconds)
         
-        guard let date = comps.date else {return "00:00"}
+        guard let date = comps.date else { return "00:00" }
         
         if hours > 0 {
             let result = hourMinuteSecondFormatter.string(from: date)

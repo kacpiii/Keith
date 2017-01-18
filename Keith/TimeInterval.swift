@@ -11,7 +11,7 @@ import AVFoundation
 
 let preferredTimescale: Int32 = 10000
 
-extension TimeInterval {
+internal extension TimeInterval {
     var asCMTime: CMTime {
         return CMTimeMakeWithSeconds(self, preferredTimescale)
     }

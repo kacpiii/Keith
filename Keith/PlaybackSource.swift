@@ -56,10 +56,3 @@ public struct PlaybackSource {
         self.source = source
     }
 }
-
-internal extension PlaybackSource {
-    
-    func getArtwork(completionHandler: @escaping (UIImage?) -> Void) {
-        
-    }
-}

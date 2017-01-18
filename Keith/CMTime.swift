@@ -9,7 +9,7 @@
 import Foundation
 import AVFoundation
 
-extension CMTime {
+internal extension CMTime {
     var asTimeInterval: TimeInterval? {
         if isNumeric {
             return CMTimeGetSeconds(self)

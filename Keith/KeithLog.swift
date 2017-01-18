@@ -8,7 +8,7 @@
 
 import Foundation
 
-func KeithLog(_ input: Any = "", file: String = #file, function: String = #function, line: Int = #line) {
+internal func KeithLog(_ input: Any = "", file: String = #file, function: String = #function, line: Int = #line) {
     #if DEBUG
         print("\n\(Date())\n\(file):\n\(function)() Line \(line)\n\(input)\n\n")
     #endif

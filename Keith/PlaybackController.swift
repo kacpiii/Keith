@@ -69,6 +69,15 @@ public class PlaybackController: NSObject {
     public static let shared = PlaybackController()
     
     
+    // MARK: Delegates & Data Sources
+    
+    /// Provides album art for the receiver.
+    public weak var artworkProvider: ArtworkProviding? {
+        didSet {
+            updateArtwork()
+        }
+    }
+    
     // MARK: Public Properties (readonly)
     
     /// The lone AVPlayer
@@ -566,7 +575,7 @@ private extension PlaybackController {
                 MPMediaItemPropertyPlaybackDuration: NSNumber(value: duration ?? 0.0),
                 MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(value: elapsedTime),
                 MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: player.rate),
-                ]
+            ]
             
             if let currentArtwork = currentArtwork {
                 if #available(iOS 10.0, *) {
@@ -586,13 +595,21 @@ private extension PlaybackController {
     }
     
     func updateArtwork() {
-        guard let playbackSource = playbackSource, case .audio = playbackSource.type else {
+        guard let playbackSource = playbackSource else {
             self.currentArtwork = nil
             return
         }
         
-        playbackSource.getArtwork { [weak self] image in
-            self?.currentArtwork = image
+        switch playbackSource.type {
+        case .audio(let nowPlayingInfo):
+            if let artworkUrl = nowPlayingInfo.artworkUrl {
+                artworkProvider?.getArtwork(for: artworkUrl) { [weak self] image in
+                    self?.currentArtwork = image
+                }
+            }
+            
+        case .video:
+            break
         }
     }
     

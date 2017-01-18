@@ -8,7 +8,7 @@
 
 import UIKit
 
-extension UIImage {
+internal extension UIImage {
     func draw(at targetSize: CGSize) -> UIImage {
         
         guard !self.size.equalTo(CGSize.zero) else {

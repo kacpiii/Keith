@@ -30,6 +30,12 @@ class VideoPlayerViewController: UIViewController {
         setupPlayerStack()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        playbackController.pause(manually: false)
+    }
+    
     private func setupPlayerStack() {
         playbackController = PlaybackController.shared
         playerViewController = AVPlayerViewController()
