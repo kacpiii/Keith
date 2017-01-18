@@ -8,6 +8,45 @@
 
 A media player for iOS written in Swift 3.0. Keith was based on the audio player implemented on https://github.com/jaredsinclair/sodes-audio-example.
 
+## Features
+
+* Generic audio and video player for iOS
+* Easier than setting up your own AVPlayer stack
+* No need to deal with key-value observing AVPlayer and AVPlayerItem properties yourself
+* Deals with audio session interruptions for you
+* Remote commands for Control Center
+
+Keith does *not* include any UI elements. Only player logic.
+
+## Installation
+
+Using [CocoaPods](http://cocoapods.org/):
+
+```ruby
+use_frameworks!
+pod 'Keith'
+```
+
+Using [Carthage](https://github.com/Carthage/Carthage):
+
+```
+github "Movile/Keith"
+```
+
+Manually:
+
+1. Drag `Keith.xcodeproj` to your project in the _Project Navigator_.
+2. Select your project and then your app target. Open the _Build Phases_ panel.
+3. Expand the _Target Dependencies_ group, and add `Keith.framework`.
+4. Click on the `+` button at the top left of the panel and select _New Copy Files Phase_. Set _Destination_ to _Frameworks_, and add `Keith.framework`.
+5. `import Keith` whenever you want to use Haneke.
+
+## Requirements
+
+- iOS 9.2+
+- Swift 3.0
+
+## Usage
 
 To get started, first create a playback source.
 ```swift
