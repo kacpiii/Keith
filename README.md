@@ -6,8 +6,6 @@
 [![GitHub release](https://img.shields.io/github/tag/movile/keith.svg)](https://github.com/Movile/Keith/releases)
 [![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg)](https://raw.githubusercontent.com/Movile/Keith/master/LICENSE.md)
 
-https://img.shields.io/cocoapods/v/Keith.svg?style=flat
-
 A media player for iOS written in Swift 3.0. Keith was based on the audio player implemented on https://github.com/jaredsinclair/sodes-audio-example.
 
 
