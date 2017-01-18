@@ -86,6 +86,9 @@ Observe the following notifications to monitor changes in the playback state.
 - willChangePlaybackSource
 - didChangePlaybackSource
 
+## Name
+
+Keith's name is homage to Keith Richards, one of the greatest guitar players that ever existed and the bodiment of rock 'n roll itself.
 
 > *If you've gotta think about being cool, you ain' cool*
 >
