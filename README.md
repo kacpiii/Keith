@@ -1,4 +1,7 @@
 # Keith
+
+[![Build Status](https://travis-ci.org/Movile/Keith.svg?branch=master)](https://travis-ci.org/Movile/Keith)
+
 A media player for iOS written in Swift 3.0. Keith was based on the audio player implemented on https://github.com/jaredsinclair/sodes-audio-example.
 
 
