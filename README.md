@@ -9,6 +9,43 @@
 A media player for iOS written in Swift 3.0. Keith was based on the audio player implemented on https://github.com/jaredsinclair/sodes-audio-example.
 
 
+To get started, first create a playback source.
+```swift
+let url = URL(string: "http://devstreaming.apple.com/videos/wwdc/2016/102w0bsn0ge83qfv7za/102/hls_vod_mvp.m3u8")!
+
+let type: PlaybackSource.`Type` = .video
+let source = PlaybackSource(url: url, type: type)
+```
+
+Then, set up the playback controller, which is Keith's working horse.
+```swift
+let playbackController = PlaybackController.shared
+playbackController.prepareToPlay(source, playWhenReady: true, startTime: 0.0)
+```
+
+The playback controller supports standard operations (play, pause, toggle play/pause, skip forward/backward, seek) and has a `status` property to check for playback states.
+
+It's possible to get the underlying AVPlayer from the playback controller and use it to include in an AVPlayerViewController, for example.
+```swift
+import AVKit
+
+let playerViewController = AVPlayerViewController()
+playerViewController.player = playbackController.player
+```
+
+Observe the following notifications to monitor changes in the playback state.
+- didBeginPlayback
+- didPausePlayback
+- didResumePlayback
+- didStopPlayback
+- willChangePositionTime
+- didChangePositionTime
+- didUpdateElapsedTime
+- didUpdateDuration
+- didUpdateStatus
+- didPlayToEnd   
+- willChangePlaybackSource
+- didChangePlaybackSource
 
 
 > *If you've gotta think about being cool, you ain' cool*
