@@ -165,6 +165,12 @@ public class PlaybackController: NSObject {
     /// The audio session.
     fileprivate let audioSession = AVAudioSession.sharedInstance()
     
+    /// The delegate for the asset resource loader.
+    fileprivate var resourceLoaderDelegate: AVAssetResourceLoaderDelegate?
+    
+    /// The queue used by the asset resource loader delegate.
+    fileprivate let queue = DispatchQueue(label: "com.movile.keith.player.assetResourceLoaderDelegate", attributes: [])
+    
     /// Indicates whether the player is being interrupted by system audio.
     fileprivate var isInterrupted = false
     
@@ -228,7 +234,11 @@ public class PlaybackController: NSObject {
     
     // MARK: Public methods
     
-    public func prepareToPlay(_ playbackSource: PlaybackSource, playWhenReady: Bool = false, startTime: TimeInterval = 0) {
+    public func prepareToPlay(
+        _ playbackSource: PlaybackSource,
+        playWhenReady: Bool = false,
+        startTime: TimeInterval = 0,
+        resourceLoaderDelegate: AVAssetResourceLoaderDelegate? = nil) {
         
         if case .playing = status, playWhenReady == false {
             pause(manually: true)
@@ -240,6 +250,9 @@ public class PlaybackController: NSObject {
         self.status = .preparing(playWhenReady: playWhenReady, startTime: startTime)
         
         let asset = AVURLAsset(url: playbackSource.url)
+        
+        self.resourceLoaderDelegate = resourceLoaderDelegate
+        asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)
         
         asset.loadValuesAsynchronously(forKeys: ["playable"]) { [weak self] in
             DispatchQueue.main.async {
