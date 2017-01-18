@@ -19,7 +19,7 @@ class VideoPlayerViewController: UIViewController {
         let url = URL(string: "http://devstreaming.apple.com/videos/wwdc/2016/102w0bsn0ge83qfv7za/102/hls_vod_mvp.m3u8")!
         
         let type: PlaybackSource.`Type` = .video
-        let source = PlaybackSource(url: url, type: type, source: .remote)
+        let source = PlaybackSource(url: url, type: type)
         
         return source
     }()

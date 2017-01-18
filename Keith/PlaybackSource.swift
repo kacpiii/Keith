@@ -41,18 +41,11 @@ public struct PlaybackSource {
         }
     }
     
-    public enum Source {
-        case local
-        case remote
-    }
-    
     public let url: URL
     public let type: Type
-    public let source: Source
     
-    public init(url: URL, type: Type, source: Source) {
+    public init(url: URL, type: Type) {
         self.url = url
         self.type = type
-        self.source = source
     }
 }
