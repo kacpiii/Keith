@@ -8,7 +8,7 @@
 
 import Foundation
 
-internal extension URL {
+public extension URL {
     
     private var prefix: String { return "keith" }
     
