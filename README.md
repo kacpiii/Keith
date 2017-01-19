@@ -58,8 +58,13 @@ let source = PlaybackSource(url: url, type: type)
 
 Then, set up the playback controller, which is Keith's working horse.
 ```swift
-let playbackController = PlaybackController.shared
+let playbackController = PlaybackController()
 playbackController.prepareToPlay(source, playWhenReady: true, startTime: 0.0)
+```
+
+You can optionally use the playback controller's `shared` property to obtain a singleton instance. This may be useful when you need to retain the controller in your whole app's lifetime -- audio player app's are a common use case.
+```swift
+let playbackController = PlaybackController.shared
 ```
 
 The playback controller supports standard operations (play, pause, toggle play/pause, skip forward/backward, seek) and has a `status` property to check for playback states.
