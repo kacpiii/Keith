@@ -237,7 +237,8 @@ public class PlaybackController: NSObject {
         _ playbackSource: PlaybackSource,
         playWhenReady: Bool = false,
         startTime: TimeInterval = 0,
-        resourceLoaderDelegate: AVAssetResourceLoaderDelegate? = nil) {
+        resourceLoaderDelegate: AVAssetResourceLoaderDelegate? = nil,
+        automaticallyWaitsToMinimizeStalling: Bool = true) {
         
         if case .playing = status, playWhenReady == false {
             pause(manually: true)
@@ -266,6 +267,10 @@ public class PlaybackController: NSObject {
         
         self.resourceLoaderDelegate = resourceLoaderDelegate
         asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)
+        
+        if #available(iOS 10, *) {
+            player.automaticallyWaitsToMinimizeStalling = automaticallyWaitsToMinimizeStalling
+        }
         
         asset.loadValuesAsynchronously(forKeys: ["playable"]) { [weak self] in
             DispatchQueue.main.async {
