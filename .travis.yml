@@ -1,10 +1,9 @@
 language: objective-c
+osx_image: xcode8
 
 branches:
  only:
  - master
 
-osx_image: xcode8.2.1
-
 script:
-- ./bin/tests
+- set -o pipefail && xcodebuild -workspace Keith.xcworkspace -scheme Keith -destination 'platform=iOS Simulator,name=iPhone 6,OS=9.3' build test | xcpretty --color
