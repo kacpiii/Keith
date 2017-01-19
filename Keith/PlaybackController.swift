@@ -248,7 +248,21 @@ public class PlaybackController: NSObject {
         self.player.replaceCurrentItem(with: nil)
         self.status = .preparing(playWhenReady: playWhenReady, startTime: startTime)
         
-        let asset = AVURLAsset(url: playbackSource.url)
+        let url: URL? = {
+            if let _ = resourceLoaderDelegate {
+                // If a custom resource loader delegate is being used,
+                // convert the URL to use a custom scheme so that the
+                // delegate will be called by AVFoundation.
+                return playbackSource.url.convertToRedirectURL()
+                
+            } else {
+                return playbackSource.url
+            }
+        }()
+        
+        guard let assetUrl = url else { return }
+        
+        let asset = AVURLAsset(url: assetUrl)
         
         self.resourceLoaderDelegate = resourceLoaderDelegate
         asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)

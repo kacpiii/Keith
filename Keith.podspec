@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = 'Keith'
   s.module_name = 'Keith'
-  s.version = '0.2.1'
+  s.version = '0.2.2'
   s.license = { type: 'MIT', file: 'LICENSE' }
   s.summary = 'A media player for iOS written in Swift.'
   s.homepage = 'https://github.com/movile/Keith'
