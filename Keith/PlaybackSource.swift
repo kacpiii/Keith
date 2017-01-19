@@ -30,7 +30,7 @@ public struct PlaybackSource {
         case audio(nowPlayingInfo: NowPlayingInfo)
         case video
         
-        var uti: String {
+        public var uti: String {
             switch self {
             case .audio:
                 return kUTTypeMP3 as String
