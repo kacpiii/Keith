@@ -222,12 +222,13 @@ public class PlaybackController: NSObject {
     }
     
     deinit {
-        playbackSource = nil
-        currentPlayerItem = nil
-        
         removeTimeObserver()
         removeCommandHandlers()
         removeObservers()
+        
+        playbackSource = nil
+        currentPlayerItem = nil
+        resourceLoaderDelegate = nil
     }
     
     
