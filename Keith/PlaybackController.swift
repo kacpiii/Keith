@@ -358,7 +358,6 @@ public class PlaybackController: NSObject {
             }
             
         case .paused, .idle, .preparing, .error:
-            status = .idle
             seekToTime(0.0, accurately: true)
         }
         
