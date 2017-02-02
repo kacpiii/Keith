@@ -428,8 +428,8 @@ private extension PlaybackController {
                 queue: .main,
                 using: { [weak self] (note) in
                     guard let this = self else { return }
-                    this.post(.didPlayToEnd)
                     this.stop()
+                    this.post(.didPlayToEnd)
             })
         }
     }
