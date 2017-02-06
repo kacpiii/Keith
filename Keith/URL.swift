@@ -8,12 +8,12 @@
 
 import Foundation
 
-public extension URL {
+internal extension URL {
     
     private var prefix: String { return "keith" }
     
     /// Adds a scheme prefix to a copy of the receiver.
-    func convertToRedirectURL() -> URL? {
+    internal func convertToRedirectURL() -> URL? {
         guard var comps = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
         guard let scheme = comps.scheme else { return nil }
         comps.scheme = prefix + scheme
@@ -21,7 +21,7 @@ public extension URL {
     }
     
     /// Removes a scheme prefix from a copy of the receiver.
-    func convertFromRedirectURL() -> URL? {
+    internal func convertFromRedirectURL() -> URL? {
         guard var comps = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
         guard let scheme = comps.scheme else { return nil }
         comps.scheme = scheme.replacingOccurrences(of: prefix, with: "")

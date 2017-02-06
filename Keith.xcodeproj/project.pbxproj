@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		081984051E38D5EB003AA1A9 /* PlaybackConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081984041E38D5EB003AA1A9 /* PlaybackConfiguration.swift */; };
+		0819840C1E3A5C24003AA1A9 /* sons.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 0819840A1E3A5681003AA1A9 /* sons.m4a */; };
+		0819840F1E3A6E62003AA1A9 /* PlaybackComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0819840E1E3A6E62003AA1A9 /* PlaybackComposition.swift */; };
+		086E13201E48A09300B8D22E /* PlaybackCompositionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 086E131F1E48A09300B8D22E /* PlaybackCompositionController.swift */; };
 		0874873A1E2CE89B00453D78 /* Keith.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 087487301E2CE89B00453D78 /* Keith.framework */; };
 		0874873F1E2CE89B00453D78 /* KeithTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0874873E1E2CE89B00453D78 /* KeithTests.swift */; };
 		087487411E2CE89B00453D78 /* Keith.h in Headers */ = {isa = PBXBuildFile; fileRef = 087487331E2CE89B00453D78 /* Keith.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -63,6 +67,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		081984041E38D5EB003AA1A9 /* PlaybackConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackConfiguration.swift; sourceTree = "<group>"; };
+		0819840A1E3A5681003AA1A9 /* sons.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; name = sons.m4a; path = ../Keith/sons.m4a; sourceTree = "<group>"; };
+		0819840E1E3A6E62003AA1A9 /* PlaybackComposition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackComposition.swift; sourceTree = "<group>"; };
+		086E131F1E48A09300B8D22E /* PlaybackCompositionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackCompositionController.swift; sourceTree = "<group>"; };
 		087487301E2CE89B00453D78 /* Keith.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Keith.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		087487331E2CE89B00453D78 /* Keith.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Keith.h; sourceTree = "<group>"; };
 		087487341E2CE89B00453D78 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -142,7 +150,10 @@
 			children = (
 				08C0FA541E2FA70D0008D4C8 /* Extensions */,
 				08C0FA501E2F97880008D4C8 /* ArtworkProvider.swift */,
+				081984041E38D5EB003AA1A9 /* PlaybackConfiguration.swift */,
+				0819840E1E3A6E62003AA1A9 /* PlaybackComposition.swift */,
 				0874877C1E2D349C00453D78 /* PlaybackController.swift */,
+				086E131F1E48A09300B8D22E /* PlaybackCompositionController.swift */,
 				087487721E2D06B400453D78 /* PlaybackSource.swift */,
 				087487581E2CEC1C00453D78 /* KeithLog.swift */,
 				087487331E2CE89B00453D78 /* Keith.h */,
@@ -163,6 +174,7 @@
 		087487611E2D066900453D78 /* KeithDemo */ = {
 			isa = PBXGroup;
 			children = (
+				0819840A1E3A5681003AA1A9 /* sons.m4a */,
 				087487621E2D066900453D78 /* AppDelegate.swift */,
 				087487761E2D281E00453D78 /* MenuViewController.swift */,
 				087487781E2D294900453D78 /* AudioPlayerViewController.swift */,
@@ -324,6 +336,7 @@
 				0874876D1E2D066900453D78 /* LaunchScreen.storyboard in Resources */,
 				0874876A1E2D066900453D78 /* Assets.xcassets in Resources */,
 				087487681E2D066900453D78 /* Main.storyboard in Resources */,
+				0819840C1E3A5C24003AA1A9 /* sons.m4a in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,10 +352,13 @@
 				08C0FA7C1E3127EB0008D4C8 /* URL.swift in Sources */,
 				087487571E2CEBD600453D78 /* TimeInterval.swift in Sources */,
 				087487561E2CEBD600453D78 /* NSObject.swift in Sources */,
+				086E13201E48A09300B8D22E /* PlaybackCompositionController.swift in Sources */,
 				087487531E2CEBB800453D78 /* CMTime.swift in Sources */,
 				08C0FA511E2F97880008D4C8 /* ArtworkProvider.swift in Sources */,
 				0874875B1E2CECBB00453D78 /* UIImage.swift in Sources */,
 				087487731E2D06B400453D78 /* PlaybackSource.swift in Sources */,
+				0819840F1E3A6E62003AA1A9 /* PlaybackComposition.swift in Sources */,
+				081984051E38D5EB003AA1A9 /* PlaybackConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

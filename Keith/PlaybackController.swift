@@ -114,7 +114,7 @@ public class PlaybackController: NSObject {
     }
     
     /// The current duration. When updated, a notification is posted.
-    public fileprivate(set) var duration: TimeInterval? {
+    public internal(set) var duration: TimeInterval? {
         didSet {
             updateNowPlayingInfo()
             post(.didUpdateDuration)
@@ -151,7 +151,9 @@ public class PlaybackController: NSObject {
         
         didSet {
             didSetPlayerItem(oldValue: oldValue)
+            registerForDidPlayToEndNotification()
             registerCommandHandlers()
+            currentPlayerItem?.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain
         }
     }
     
@@ -177,6 +179,8 @@ public class PlaybackController: NSObject {
     /// An observer for observing the player's elapsed time.
     fileprivate var currentPlayerItemObserver: NSObjectProtocol?
     
+    fileprivate var currentPlayerItemIsBeingKeyValueObserved: Bool = false
+    
     /// The token returned by the periodic time observer
     fileprivate var timeObserverToken: Any?
     
@@ -201,11 +205,6 @@ public class PlaybackController: NSObject {
         super.init()
         
         try? audioSession.setCategory(AVAudioSessionCategoryPlayback)
-        
-        if #available(iOS 10, *) {
-            // Since we are using a custom asset resource delegate, disable `automaticallyWaitsToMinimizeStalling` as recommended by Apple in the documentation.
-            player.automaticallyWaitsToMinimizeStalling = false
-        }
         
         player.add(observer: self, for: playerKeyPaths, options: .new, context: &PlaybackControllerContext)
         
@@ -236,49 +235,28 @@ public class PlaybackController: NSObject {
     
     public func prepareToPlay(
         _ playbackSource: PlaybackSource,
-        playWhenReady: Bool = false,
-        startTime: TimeInterval = 0,
-        resourceLoaderDelegate: AVAssetResourceLoaderDelegate? = nil,
-        automaticallyWaitsToMinimizeStalling: Bool = true) {
+        configuration: PlaybackConfiguration)
+    {
         
-        if case .playing = status, playWhenReady == false {
+        if case .playing = status, configuration.playWhenReady == false {
             pause(manually: true)
         }
         
         self.playbackSource = playbackSource
         self.currentPlayerItem = nil
         self.player.replaceCurrentItem(with: nil)
-        self.status = .preparing(playWhenReady: playWhenReady, startTime: startTime)
-        
-        let url: URL? = {
-            if let _ = resourceLoaderDelegate {
-                // If a custom resource loader delegate is being used,
-                // convert the URL to use a custom scheme so that the
-                // delegate will be called by AVFoundation.
-                return playbackSource.url.convertToRedirectURL()
-                
-            } else {
-                return playbackSource.url
-            }
-        }()
-        
-        guard let assetUrl = url else { return }
-        
-        let asset = AVURLAsset(url: assetUrl)
-        
-        self.resourceLoaderDelegate = resourceLoaderDelegate
-        asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)
+        self.status = .preparing(playWhenReady: configuration.playWhenReady, startTime: configuration.startTime)
         
         if #available(iOS 10, *) {
-            player.automaticallyWaitsToMinimizeStalling = automaticallyWaitsToMinimizeStalling
+            player.automaticallyWaitsToMinimizeStalling = configuration.automaticallyWaitsToMinimizeStalling
         }
         
-        asset.loadValuesAsynchronously(forKeys: ["playable"]) { [weak self] in
+        playbackSource.asset.loadValuesAsynchronously(forKeys: ["playable"]) { [weak self] in
             DispatchQueue.main.async {
                 guard let this = self else { return }
                 
                 var error: NSError?
-                let keyStatus = asset.statusOfValue(forKey: "playable", error: &error)
+                let keyStatus = playbackSource.asset.statusOfValue(forKey: "playable", error: &error)
                 
                 if keyStatus == .failed {
                     KeithLog("Error when obtaining `playable` key for resource: \(error?.localizedDescription)")
@@ -287,7 +265,7 @@ public class PlaybackController: NSObject {
                     return
                 }
                 
-                this.currentPlayerItem = AVPlayerItem(asset: asset)
+                this.currentPlayerItem = playbackSource.playerItem
                 this.player.replaceCurrentItem(with: this.currentPlayerItem!)
                 
                 this.registerCommandHandlers()
@@ -404,19 +382,106 @@ public class PlaybackController: NSObject {
 }
 
 
-// MARK: Private methods
+// MARK: Internal methods
 
-private extension PlaybackController {
-    func post(_ notification: PlaybackControllerNotification, userInfo: [String: Any]? = nil) {
+internal extension PlaybackController {
+    internal func didSetPlayerItem(oldValue: AVPlayerItem?) {
+        oldValue?.remove(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
+        currentPlayerItem?.add(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
+        currentPlayerItemIsBeingKeyValueObserved = true
+    }
+    
+    internal func playerItemDidChangeStatus(_ item: AVPlayerItem) {
+        switch item.status {
+        case .readyToPlay:
+            if case .preparing(let shouldPlay, let startTime) = status {
+                if startTime > 0 {
+                    seekToTime(startTime, accurately: true) { [weak self] in
+                        guard let this = self else {return}
+                        if shouldPlay {
+                            this.play()
+                        } else {
+                            this.status = .paused(manually: true)
+                        }
+                    }
+                }
+                else if shouldPlay {
+                    play()
+                } else {
+                    status = .paused(manually: true)
+                }
+            }
+            
+        case .failed:
+            KeithLog("Item status failed: \(item.error)")
+            status = .error(item.error)
+            
+        case .unknown:
+            KeithLog("Item status unknown")
+            status = .error(nil)
+        }
+    }
+    
+    @available(iOS 10.0, *)
+    internal func playerDidChangeTimeControlStatus() {
+        switch player.timeControlStatus {
+        case .paused:
+            switch status {
+            case .paused(_), .idle, .error(_), .preparing(_,_):
+                break
+            case .playing, .buffering:
+                status = .paused(manually: false)
+            }
+            
+        case .playing:
+            status = .playing(fromBeginning: isPlayingFromBeginning)
+            
+        case .waitingToPlayAtSpecifiedRate:
+            switch status {
+            case .idle, .error(_), .preparing(_,_):
+                break
+            case .paused, .playing, .buffering:
+                status = .buffering
+            }
+        }
+        
+        updateNowPlayingInfo()
+    }
+    
+    internal func playerDidChangeRate() {
+        let stoppedRate = Float(0.0)
+        
+        switch (player.rate, status) {
+        case (stoppedRate, .playing):
+            // Rate indicates playback is stopped, but our status doesn't reflect that.
+            status = .paused(manually: true)
+            
+        case (stoppedRate, _):
+            // Rate indicates playback is stopped and our status is not playing, so we're good.
+            break
+            
+        case (_, .playing):
+            // Rate indicates audio or video is being played and our status the same, so we're good.
+            break
+            
+        case (_, _):
+            // Rate indicates audio or video is being played, but our status doesn't reflect that.
+            status = .playing(fromBeginning: isPlayingFromBeginning)
+        }
+    }
+    
+    internal func post(_ notification: PlaybackControllerNotification, userInfo: [String: Any]? = nil) {
         let note = Notification(name: notification.name, object: self, userInfo: userInfo)
         NotificationCenter.default.post(note)
     }
+}
+
+
+// MARK: Private methods
+
+private extension PlaybackController {
     
-    func didSetPlayerItem(oldValue: AVPlayerItem?) {
-        oldValue?.remove(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
-        currentPlayerItem?.add(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
-        currentPlayerItem?.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain
-        
+    func registerForDidPlayToEndNotification() {
         if let observer = currentPlayerItemObserver {
             NotificationCenter.default.removeObserver(observer)
         }
@@ -505,85 +570,6 @@ private extension PlaybackController {
                     break
                 }
             }
-        }
-    }
-    
-    @available(iOS 10.0, *)
-    func playerDidChangeTimeControlStatus() {
-        switch player.timeControlStatus {
-        case .paused:
-            switch status {
-            case .paused(_), .idle, .error(_), .preparing(_,_):
-                break
-            case .playing, .buffering:
-                status = .paused(manually: false)
-            }
-            
-        case .playing:
-            status = .playing(fromBeginning: isPlayingFromBeginning)
-            
-        case .waitingToPlayAtSpecifiedRate:
-            switch status {
-            case .idle, .error(_), .preparing(_,_):
-                break
-            case .paused, .playing, .buffering:
-                status = .buffering
-            }
-        }
-        
-        updateNowPlayingInfo()
-    }
-    
-    func playerDidChangeRate() {
-        let stoppedRate = Float(0.0)
-        
-        switch (player.rate, status) {
-        case (stoppedRate, .playing):
-            // Rate indicates playback is stopped, but our status doesn't reflect that.
-            status = .paused(manually: true)
-            
-        case (stoppedRate, _):
-            // Rate indicates playback is stopped and our status is not playing, so we're good.
-            break
-            
-        case (_, .playing):
-            // Rate indicates audio or video is being played and our status the same, so we're good.
-            break
-            
-        case (_, _):
-            // Rate indicates audio or video is being played, but our status doesn't reflect that.
-            status = .playing(fromBeginning: isPlayingFromBeginning)
-        }
-    }
-    
-    func playerItemDidChangeStatus(_ item: AVPlayerItem) {
-        switch item.status {
-        case .readyToPlay:
-            if case .preparing(let shouldPlay, let startTime) = status {
-                if startTime > 0 {
-                    seekToTime(startTime, accurately: true) { [weak self] in
-                        guard let this = self else {return}
-                        if shouldPlay {
-                            this.play()
-                        } else {
-                            this.status = .paused(manually: true)
-                        }
-                    }
-                }
-                else if shouldPlay {
-                    play()
-                } else {
-                    status = .paused(manually: true)
-                }
-            }
-            
-        case .failed:
-            KeithLog("Item status failed: \(item.error)")
-            status = .error(item.error)
-            
-        case .unknown:
-            KeithLog("Item status unknown")
-            status = .error(nil)
         }
     }
     
@@ -695,7 +681,11 @@ extension PlaybackController {
     
     func removeObservers() {
         player.remove(observer: self, for: playerKeyPaths, context: &PlaybackControllerContext)
-        currentPlayerItem?.remove(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
+        
+        if currentPlayerItemIsBeingKeyValueObserved == true {
+            currentPlayerItem?.remove(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
+            currentPlayerItemIsBeingKeyValueObserved = false
+        }
     }
 }
 
