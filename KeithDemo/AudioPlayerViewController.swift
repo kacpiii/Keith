@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import AVKit
 import AVFoundation
 import Keith
 
@@ -20,7 +19,6 @@ class AudioPlayerViewController: UIViewController {
     private let playbackController = PlaybackController.shared
     private let playbackCompositionController = PlaybackCompositionController.sharedComposition
     private let artworkProvider = ArtworkProvider()
-    private var playerViewController: AVPlayerViewController?
     
     private lazy var simpleAudioSource: PlaybackSource = {
         let nowPlayingInfo = NowPlayingInfo(

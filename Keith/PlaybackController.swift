@@ -336,7 +336,6 @@ public class PlaybackController: NSObject {
             }
             
         case .paused, .idle, .preparing, .error:
-            status = .idle
             seekToTime(0.0, accurately: true)
         }
         
@@ -494,8 +493,8 @@ private extension PlaybackController {
                 queue: .main,
                 using: { [weak self] (note) in
                     guard let this = self else { return }
-                    this.post(.didPlayToEnd)
                     this.stop()
+                    this.post(.didPlayToEnd)
             })
         }
     }
