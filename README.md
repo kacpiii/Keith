@@ -39,7 +39,7 @@ Manually:
 2. Select your project and then your app target. Open the _Build Phases_ panel.
 3. Expand the _Target Dependencies_ group, and add `Keith.framework`.
 4. Click on the `+` button at the top left of the panel and select _New Copy Files Phase_. Set _Destination_ to _Frameworks_, and add `Keith.framework`.
-5. `import Keith` whenever you want to use Haneke.
+5. `import Keith` whenever you want to use Keith.
 
 ## Requirements
 
