@@ -140,6 +140,12 @@ public class PlaybackController: NSObject {
         }
     }
     
+    public var audioMix: AVAudioMix? {
+        didSet {
+            currentPlayerItem?.audioMix = audioMix
+        }
+    }
+    
     
     // MARK: File Private Properties
     
