@@ -25,7 +25,7 @@ public struct NowPlayingInfo {
 }
 
 public enum PlaybackType {
-    case audio(nowPlayingInfo: NowPlayingInfo)
+    case audio(nowPlayingInfo: NowPlayingInfo?)
     case video
     
     public var uti: String {
