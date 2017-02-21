@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import AVFoundation
 import Keith
 
 class AudioPlayerViewController: UIViewController {
@@ -17,10 +16,9 @@ class AudioPlayerViewController: UIViewController {
     @IBOutlet private weak var durationLabel: UILabel?
     
     private let playbackController = PlaybackController.shared
-    private let playbackCompositionController = PlaybackCompositionController.sharedComposition
     private let artworkProvider = ArtworkProvider()
     
-    private lazy var simpleAudioSource: PlaybackSource = {
+    private lazy var source: PlaybackSource = {
         let nowPlayingInfo = NowPlayingInfo(
             title: "Title name",
             albumTitle: "Album name",
@@ -34,35 +32,10 @@ class AudioPlayerViewController: UIViewController {
         return PlaybackSource(url: url, type: type)
     }()
     
-    private lazy var assets: [AVURLAsset]? = {
-        guard let url1 = URL(string: "http://content.blubrry.com/exponent/exponent86.mp3") else { return nil }
-        guard let url2 = Bundle.main.url(forResource: "sons", withExtension: "m4a") else { return nil }
-        
-        let urls = [url1, url2]
-        let assets = urls.map { AVURLAsset(url: $0) }
-        
-        return assets
-    }()
-    
-    private lazy var compositionSource: PlaybackComposition? = {
-        let nowPlayingInfo = NowPlayingInfo(
-            title: "Title name",
-            albumTitle: "Album name",
-            artist: "Artist name",
-            artworkUrl: nil
-        )
-        
-        let type = PlaybackType.audio(nowPlayingInfo: nowPlayingInfo)
-        
-        guard let assets = self.assets else { return nil }
-        
-        return PlaybackComposition.overlappingComposition(for: assets, playbackType: type)
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupCompositionStack()
+        setupPlayerStack()
     }
     
     private func setupPlayerStack() {
@@ -70,7 +43,7 @@ class AudioPlayerViewController: UIViewController {
         configuration.playWhenReady = false
         
         playbackController.artworkProvider = artworkProvider
-        playbackController.prepareToPlay(simpleAudioSource, configuration: configuration)
+        playbackController.prepareToPlay(source, configuration: configuration)
         
         let center = NotificationCenter.default
         
@@ -132,74 +105,7 @@ class AudioPlayerViewController: UIViewController {
         }
     }
     
-    private func setupCompositionStack() {
-        var configuration = PlaybackConfiguration.default
-        configuration.playWhenReady = false
-        
-        playbackCompositionController.artworkProvider = artworkProvider
-        playbackCompositionController.prepareToPlay(compositionSource!, configuration: configuration)
-        
-        let center = NotificationCenter.default
-        
-        center.addObserver(
-            forName: PlaybackControllerNotification.didUpdateStatus.name,
-            object: playbackCompositionController,
-            queue: .main) { _ in
-                switch self.playbackCompositionController.status {
-                case .preparing(_, _):
-                    self.playPauseButton?.isEnabled = false
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = true
-                    
-                case .buffering:
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = true
-                    
-                case .playing(_):
-                    self.playPauseButton?.setTitle("Pause", for: .normal)
-                    self.playPauseButton?.isEnabled = true
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    
-                case .paused(_), .idle:
-                    self.playPauseButton?.setTitle("Play", for: .normal)
-                    self.playPauseButton?.isEnabled = true
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    
-                case .error(let error):
-                    self.playPauseButton?.setTitle("Error", for: .normal)
-                    self.playPauseButton?.isEnabled = false
-                    UIApplication.shared.isNetworkActivityIndicatorVisible = false
-                    
-                    if let error = error {
-                        print(error)
-                    }
-                }
-        }
-        
-        center.addObserver(
-            forName: PlaybackControllerNotification.didUpdateElapsedTime.name,
-            object: playbackCompositionController,
-            queue: .main) { _ in
-                let elapsedTime = floor(self.playbackCompositionController.elapsedTime)
-                self.elapsedTimeLabel?.text = TimeParser.string(from: elapsedTime)
-        }
-        
-        center.addObserver(
-            forName: PlaybackControllerNotification.didUpdateDuration.name,
-            object: playbackCompositionController,
-            queue: .main) { _ in
-                guard let _duration = self.playbackCompositionController.duration else { return }
-                let duration = floor(_duration)
-                self.durationLabel?.text = TimeParser.string(from: duration)
-        }
-        center.addObserver(
-            forName: PlaybackControllerNotification.didPlayToEnd.name,
-            object: playbackCompositionController,
-            queue: .main) { _ in
-                print("PlaybackCompositionController didPlayToEnd")
-        }
-    }
-
-    
     @IBAction func togglePlayPause(_ playPauseButton: UIButton) {
-        playbackCompositionController.togglePlayPause()
+        playbackController.togglePlayPause()
     }
 }
