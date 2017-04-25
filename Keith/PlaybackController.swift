@@ -240,6 +240,7 @@ public class PlaybackController: NSObject {
         self.playbackSource = playbackSource
         self.currentPlayerItem = nil
         self.player.replaceCurrentItem(with: nil)
+        self.resourceLoaderDelegate = configuration.resourceLoaderDelegate
         self.status = .preparing(playWhenReady: configuration.playWhenReady, startTime: configuration.startTime)
         
         let url: URL? = {
@@ -257,8 +258,6 @@ public class PlaybackController: NSObject {
         guard let assetUrl = url else { return }
         
         let asset = AVURLAsset(url: assetUrl)
-        
-        self.resourceLoaderDelegate = configuration.resourceLoaderDelegate
         asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)
         
         if #available(iOS 10, *) {
