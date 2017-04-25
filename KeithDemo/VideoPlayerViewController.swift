@@ -18,7 +18,7 @@ class VideoPlayerViewController: UIViewController {
     private lazy var source: PlaybackSource = {
         let url = URL(string: "http://devstreaming.apple.com/videos/wwdc/2016/102w0bsn0ge83qfv7za/102/hls_vod_mvp.m3u8")!
         
-        let type: PlaybackSource.`Type` = .video
+        let type: PlaybackType = .video
         let source = PlaybackSource(url: url, type: type)
         
         return source
@@ -73,7 +73,10 @@ class VideoPlayerViewController: UIViewController {
                     print(error)
                 }
         }
-
-        playbackController.prepareToPlay(source, playWhenReady: true, startTime: 0.0)
+        
+        var configuration = PlaybackConfiguration.default
+        configuration.playWhenReady = true
+        
+        playbackController.prepareToPlay(source, configuration: configuration)
     }
 }

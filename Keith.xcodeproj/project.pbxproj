@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		082389811EAFD5090009F4BA /* PlaybackConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082389801EAFD5090009F4BA /* PlaybackConfiguration.swift */; };
 		0874873A1E2CE89B00453D78 /* Keith.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 087487301E2CE89B00453D78 /* Keith.framework */; };
 		0874873F1E2CE89B00453D78 /* KeithTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0874873E1E2CE89B00453D78 /* KeithTests.swift */; };
 		087487411E2CE89B00453D78 /* Keith.h in Headers */ = {isa = PBXBuildFile; fileRef = 087487331E2CE89B00453D78 /* Keith.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -63,6 +64,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		082389801EAFD5090009F4BA /* PlaybackConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackConfiguration.swift; sourceTree = "<group>"; };
 		087487301E2CE89B00453D78 /* Keith.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Keith.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		087487331E2CE89B00453D78 /* Keith.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Keith.h; sourceTree = "<group>"; };
 		087487341E2CE89B00453D78 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 			children = (
 				08C0FA541E2FA70D0008D4C8 /* Extensions */,
 				08C0FA501E2F97880008D4C8 /* ArtworkProvider.swift */,
+				082389801EAFD5090009F4BA /* PlaybackConfiguration.swift */,
 				0874877C1E2D349C00453D78 /* PlaybackController.swift */,
 				087487721E2D06B400453D78 /* PlaybackSource.swift */,
 				087487581E2CEC1C00453D78 /* KeithLog.swift */,
@@ -343,6 +346,7 @@
 				08C0FA511E2F97880008D4C8 /* ArtworkProvider.swift in Sources */,
 				0874875B1E2CECBB00453D78 /* UIImage.swift in Sources */,
 				087487731E2D06B400453D78 /* PlaybackSource.swift in Sources */,
+				082389811EAFD5090009F4BA /* PlaybackConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -19,7 +19,7 @@ class AudioPlayerViewController: UIViewController {
     private let artworkProvider = ArtworkProvider()
     
     private lazy var source: PlaybackSource = {
-        let nowPlayingInfo = PlaybackSource.NowPlayingInfo(
+        let nowPlayingInfo = NowPlayingInfo(
             title: "Title name",
             albumTitle: "Album name",
             artist: "Artist name",
@@ -28,7 +28,7 @@ class AudioPlayerViewController: UIViewController {
         
         let url = URL(string: "http://content.blubrry.com/exponent/exponent86.mp3")!
         
-        let type: PlaybackSource.`Type` = .audio(nowPlayingInfo: nowPlayingInfo)
+        let type: PlaybackType = .audio(nowPlayingInfo: nowPlayingInfo)
         let source = PlaybackSource(url: url, type: type)
         
         return source
@@ -42,7 +42,7 @@ class AudioPlayerViewController: UIViewController {
     
     private func setupPlayerStack() {
         playbackController.artworkProvider = artworkProvider
-        playbackController.prepareToPlay(source, playWhenReady: false, startTime: 0.0)
+        playbackController.prepareToPlay(source)
         
         let center = NotificationCenter.default
         

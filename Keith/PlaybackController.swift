@@ -202,11 +202,6 @@ public class PlaybackController: NSObject {
         
         try? audioSession.setCategory(AVAudioSessionCategoryPlayback)
         
-        if #available(iOS 10, *) {
-            // Since we are using a custom asset resource delegate, disable `automaticallyWaitsToMinimizeStalling` as recommended by Apple in the documentation.
-            player.automaticallyWaitsToMinimizeStalling = false
-        }
-        
         player.add(observer: self, for: playerKeyPaths, options: .new, context: &PlaybackControllerContext)
         
         timeObserverToken = player.addPeriodicTimeObserver(
@@ -236,19 +231,16 @@ public class PlaybackController: NSObject {
     
     public func prepareToPlay(
         _ playbackSource: PlaybackSource,
-        playWhenReady: Bool = false,
-        startTime: TimeInterval = 0,
-        resourceLoaderDelegate: AVAssetResourceLoaderDelegate? = nil,
-        automaticallyWaitsToMinimizeStalling: Bool = true) {
+        configuration: PlaybackConfiguration = .default) {
         
-        if case .playing = status, playWhenReady == false {
+        if case .playing = status, configuration.playWhenReady == false {
             pause(manually: true)
         }
         
         self.playbackSource = playbackSource
         self.currentPlayerItem = nil
         self.player.replaceCurrentItem(with: nil)
-        self.status = .preparing(playWhenReady: playWhenReady, startTime: startTime)
+        self.status = .preparing(playWhenReady: configuration.playWhenReady, startTime: configuration.startTime)
         
         let url: URL? = {
             if let _ = resourceLoaderDelegate {
@@ -266,11 +258,11 @@ public class PlaybackController: NSObject {
         
         let asset = AVURLAsset(url: assetUrl)
         
-        self.resourceLoaderDelegate = resourceLoaderDelegate
+        self.resourceLoaderDelegate = configuration.resourceLoaderDelegate
         asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)
         
         if #available(iOS 10, *) {
-            player.automaticallyWaitsToMinimizeStalling = automaticallyWaitsToMinimizeStalling
+            player.automaticallyWaitsToMinimizeStalling = configuration.automaticallyWaitsToMinimizeStalling
         }
         
         asset.loadValuesAsynchronously(forKeys: ["playable"]) { [weak self] in
@@ -281,7 +273,8 @@ public class PlaybackController: NSObject {
                 let keyStatus = asset.statusOfValue(forKey: "playable", error: &error)
                 
                 if keyStatus == .failed {
-                    KeithLog("Error when obtaining `playable` key for resource: \(error?.localizedDescription)")
+                    let errorDescription = error?.localizedDescription ?? ""
+                    KeithLog("Error when obtaining `playable` key for resource: \(errorDescription)")
                     
                     this.status = .error(error)
                     return
@@ -578,7 +571,8 @@ private extension PlaybackController {
             }
             
         case .failed:
-            KeithLog("Item status failed: \(item.error)")
+            let errorDescription = item.error?.localizedDescription ?? ""
+            KeithLog("Item status failed: \(errorDescription)")
             status = .error(item.error)
             
         case .unknown:

@@ -26,7 +26,8 @@ public final class ArtworkProvider: ArtworkProviding {
         
         task = session.downloadTask(with: request) { (fileUrl, urlResponse, error) in
             guard error == nil else {
-                KeithLog("Failed to download artwork with error: \(error).")
+                let errorDescription = error?.localizedDescription ?? ""
+                KeithLog("Failed to download artwork with error: \(errorDescription).")
                 
                 DispatchQueue.main.async {
                     completionHandler(nil)
