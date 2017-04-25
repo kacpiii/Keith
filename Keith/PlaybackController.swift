@@ -589,6 +589,8 @@ private extension PlaybackController {
         switch playbackSource.type {
         case .audio(let nowPlayingInfo):
             
+            guard let nowPlayingInfo = nowPlayingInfo else { return }
+            
             let mediaType = NSNumber(value: MPMediaType.anyAudio.rawValue)
         
             var info: [String: Any] = [
@@ -626,7 +628,7 @@ private extension PlaybackController {
         
         switch playbackSource.type {
         case .audio(let nowPlayingInfo):
-            if let artworkUrl = nowPlayingInfo.artworkUrl {
+            if let artworkUrl = nowPlayingInfo?.artworkUrl {
                 artworkProvider?.getArtwork(for: artworkUrl) { [weak self] image in
                     self?.currentArtwork = image
                 }

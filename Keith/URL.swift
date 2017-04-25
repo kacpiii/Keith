@@ -15,7 +15,7 @@ public extension URL {
     /// Adds a scheme prefix to a copy of the receiver.
     func convertToRedirectURL() -> URL? {
         guard var comps = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
-        guard let scheme = comps.scheme else { return nil }
+        let scheme = comps.scheme ?? ""
         comps.scheme = prefix + scheme
         return comps.url
     }
@@ -23,7 +23,7 @@ public extension URL {
     /// Removes a scheme prefix from a copy of the receiver.
     func convertFromRedirectURL() -> URL? {
         guard var comps = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
-        guard let scheme = comps.scheme else { return nil }
+        let scheme = comps.scheme ?? ""
         comps.scheme = scheme.replacingOccurrences(of: prefix, with: "")
         return comps.url
     }
