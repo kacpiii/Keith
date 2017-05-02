@@ -39,13 +39,28 @@ public enum PlaybackType {
     }
 }
 
+public enum SourceType {
+    case url(url: URL)
+    case asset(asset: AVAsset)
+}
+
 public struct PlaybackSource {
     
-    public let url: URL
+    public let url: URL?
+    public let asset: AVAsset?
     public let type: PlaybackType
     
-    public init(url: URL, type: PlaybackType) {
-        self.url = url
+    public init(sourceType: SourceType, type: PlaybackType) {
+        switch sourceType {
+        case .url(let url):
+            self.url = url
+            self.asset = AVURLAsset(url: url)
+            
+        case .asset(let asset):
+            self.url = (asset as? AVURLAsset)?.url ?? nil
+            self.asset = asset
+        }
+        
         self.type = type
     }
 }

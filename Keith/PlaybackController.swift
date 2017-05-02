@@ -240,25 +240,9 @@ public class PlaybackController: NSObject {
         self.playbackSource = playbackSource
         self.currentPlayerItem = nil
         self.player.replaceCurrentItem(with: nil)
-        self.resourceLoaderDelegate = configuration.resourceLoaderDelegate
         self.status = .preparing(playWhenReady: configuration.playWhenReady, startTime: configuration.startTime)
         
-        let url: URL? = {
-            if let _ = resourceLoaderDelegate {
-                // If a custom resource loader delegate is being used,
-                // convert the URL to use a custom scheme so that the
-                // delegate will be called by AVFoundation.
-                return playbackSource.url.convertToRedirectURL()
-                
-            } else {
-                return playbackSource.url
-            }
-        }()
-        
-        guard let assetUrl = url else { return }
-        
-        let asset = AVURLAsset(url: assetUrl)
-        asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)
+        guard let asset = asset(for: playbackSource, configuration: configuration) else { return }
         
         if #available(iOS 10, *) {
             player.automaticallyWaitsToMinimizeStalling = configuration.automaticallyWaitsToMinimizeStalling
@@ -287,6 +271,24 @@ public class PlaybackController: NSObject {
                 this.updateArtwork()
                 this.updateNowPlayingInfo()
             }
+        }
+    }
+    
+    private func asset(for playbackSource: PlaybackSource, configuration: PlaybackConfiguration) -> AVAsset? {
+        
+        // If a custom resource loader delegate is being used,
+        // convert the URL to use a custom scheme so that the
+        // delegate will be called by AVFoundation.
+        if let resourceLoaderDelegate = configuration.resourceLoaderDelegate,
+            let url = playbackSource.url?.convertToRedirectURL() {
+            
+            let asset = AVURLAsset(url: url)
+            asset.resourceLoader.setDelegate(resourceLoaderDelegate, queue: queue)
+            self.resourceLoaderDelegate = resourceLoaderDelegate
+            return asset
+        
+        } else {
+            return playbackSource.asset
         }
     }
     

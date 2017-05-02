@@ -27,9 +27,9 @@ class AudioPlayerViewController: UIViewController {
         )
         
         let url = URL(string: "http://content.blubrry.com/exponent/exponent86.mp3")!
-        
+        let sourceType = SourceType.url(url: url)
         let type: PlaybackType = .audio(nowPlayingInfo: nowPlayingInfo)
-        let source = PlaybackSource(url: url, type: type)
+        let source = PlaybackSource(sourceType: sourceType, type: type)
         
         return source
     }()
