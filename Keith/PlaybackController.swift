@@ -74,7 +74,9 @@ public class PlaybackController: NSObject {
     /// Provides album art for the receiver.
     public weak var artworkProvider: ArtworkProviding? {
         didSet {
-            updateArtwork()
+            if registerNowPlayingInfoInfoAndRemoteCommandHandlers {
+                updateArtwork()
+            }
         }
     }
     
@@ -91,9 +93,6 @@ public class PlaybackController: NSObject {
         }
         
         didSet {
-            currentArtwork = nil
-            updateArtwork()
-            updateNowPlayingInfo()
             post(.didChangePlaybackSource)
         }
     }
@@ -152,13 +151,8 @@ public class PlaybackController: NSObject {
     
     /// The current AVPlayerItem.
     fileprivate var currentPlayerItem: AVPlayerItem? {
-        willSet {
-            removeCommandHandlers()
-        }
-        
         didSet {
             didSetPlayerItem(oldValue: oldValue)
-            registerCommandHandlers()
         }
     }
     
@@ -198,6 +192,15 @@ public class PlaybackController: NSObject {
     
     /// AVPlayerItem keypaths to be observed using KVO.
     fileprivate let playerItemKeyPaths: [String] = ["status", "duration"]
+    
+    fileprivate var registerNowPlayingInfoInfoAndRemoteCommandHandlers: Bool = true {
+        didSet {
+            if registerNowPlayingInfoInfoAndRemoteCommandHandlers == false {
+                removeCommandHandlers()
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+            }
+        }
+    }
     
     
     // MARK: Init/Deinit
@@ -245,6 +248,7 @@ public class PlaybackController: NSObject {
         }
         
         self.playbackSource = playbackSource
+        self.registerNowPlayingInfoInfoAndRemoteCommandHandlers = configuration.registerNowPlayingInfoInfoAndRemoteCommandHandlers
         self.currentPlayerItem = nil
         self.player.replaceCurrentItem(with: nil)
         self.status = .preparing(playWhenReady: configuration.playWhenReady, startTime: configuration.startTime)
@@ -273,10 +277,13 @@ public class PlaybackController: NSObject {
                 this.currentPlayerItem = AVPlayerItem(asset: asset)
                 this.player.replaceCurrentItem(with: this.currentPlayerItem!)
                 
-                this.registerCommandHandlers()
+                if configuration.registerNowPlayingInfoInfoAndRemoteCommandHandlers {
+                    this.registerCommandHandlers()
+                    this.updateArtwork()
+                    this.updateNowPlayingInfo()
+                }
+                
                 this.registerForAudioSessionInterruptionNotification()
-                this.updateArtwork()
-                this.updateNowPlayingInfo()
             }
         }
     }
@@ -590,7 +597,7 @@ private extension PlaybackController {
     }
     
     func updateNowPlayingInfo() {
-        guard let playbackSource = playbackSource, case .audio = playbackSource.type else {
+        guard let playbackSource = playbackSource, case .audio = playbackSource.type, registerNowPlayingInfoInfoAndRemoteCommandHandlers else {
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
             return
         }
@@ -598,7 +605,10 @@ private extension PlaybackController {
         switch playbackSource.type {
         case .audio(let nowPlayingInfo):
             
-            guard let nowPlayingInfo = nowPlayingInfo else { return }
+            guard let nowPlayingInfo = nowPlayingInfo else {
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+                return
+            }
             
             let mediaType = NSNumber(value: MPMediaType.anyAudio.rawValue)
         

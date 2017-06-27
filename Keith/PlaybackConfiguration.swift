@@ -14,6 +14,7 @@ public struct PlaybackConfiguration {
     public var startTime: TimeInterval = 0.0
     public var resourceLoaderDelegate: AVAssetResourceLoaderDelegate? = nil
     public var automaticallyWaitsToMinimizeStalling: Bool = true
+    public var registerNowPlayingInfoInfoAndRemoteCommandHandlers: Bool = true
     
     public static var `default`: PlaybackConfiguration {
         return PlaybackConfiguration()
