@@ -274,8 +274,8 @@ public class PlaybackController: NSObject {
         
         switch status {
         case .paused, .preparing:
-            status = .playing(fromBeginning: isPlayingFromBeginning)
             player.play()
+            status = .playing(fromBeginning: isPlayingFromBeginning)
             
             if isPlayingFromBeginning {
                 post(.didBeginPlayback)
@@ -298,8 +298,8 @@ public class PlaybackController: NSObject {
             }
             
         case .playing, .buffering:
-            status = .paused(manually: manually)
             player.pause()
+            status = .paused(manually: manually)
             post(.didPausePlayback)
             
         case .idle, .paused, .error:
