@@ -68,17 +68,7 @@ public class PlaybackController: NSObject {
     /// The singleton instance. Optional.
     public static let shared = PlaybackController()
     
-    
     // MARK: Delegates & Data Sources
-    
-    /// Provides album art for the receiver.
-    public weak var artworkProvider: ArtworkProviding? {
-        didSet {
-            if registerNowPlayingInfoInfoAndRemoteCommandHandlers {
-                updateArtwork()
-            }
-        }
-    }
     
     // MARK: Public Properties (readonly)
     
@@ -100,7 +90,6 @@ public class PlaybackController: NSObject {
     /// The current status. When changed, a notification is posted.
     public fileprivate(set) var status: Status = .idle {
         didSet {
-            updateNowPlayingInfo()
             post(.didUpdateStatus)
         }
     }
@@ -115,7 +104,6 @@ public class PlaybackController: NSObject {
     /// The current duration. When updated, a notification is posted.
     public fileprivate(set) var duration: TimeInterval? {
         didSet {
-            updateNowPlayingInfo()
             post(.didUpdateDuration)
         }
     }
@@ -156,13 +144,6 @@ public class PlaybackController: NSObject {
         }
     }
     
-    /// The current artwork, if any.
-    fileprivate var currentArtwork: UIImage? = nil {
-        didSet {
-            updateNowPlayingInfo()
-        }
-    }
-    
     /// The audio session.
     fileprivate let audioSession = AVAudioSession.sharedInstance()
     
@@ -193,16 +174,6 @@ public class PlaybackController: NSObject {
     /// AVPlayerItem keypaths to be observed using KVO.
     fileprivate let playerItemKeyPaths: [String] = ["status", "duration"]
     
-    fileprivate var registerNowPlayingInfoInfoAndRemoteCommandHandlers: Bool = true {
-        didSet {
-            if registerNowPlayingInfoInfoAndRemoteCommandHandlers == false {
-                removeCommandHandlers()
-                MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-            }
-        }
-    }
-    
-    
     // MARK: Init/Deinit
     
     public override init() {
@@ -228,7 +199,6 @@ public class PlaybackController: NSObject {
     
     deinit {
         removeTimeObserver()
-        removeCommandHandlers()
         removeObservers()
         
         playbackSource = nil
@@ -248,7 +218,6 @@ public class PlaybackController: NSObject {
         }
         
         self.playbackSource = playbackSource
-        self.registerNowPlayingInfoInfoAndRemoteCommandHandlers = configuration.registerNowPlayingInfoInfoAndRemoteCommandHandlers
         self.currentPlayerItem = nil
         self.player.replaceCurrentItem(with: nil)
         self.status = .preparing(playWhenReady: configuration.playWhenReady, startTime: configuration.startTime)
@@ -276,12 +245,6 @@ public class PlaybackController: NSObject {
                 
                 this.currentPlayerItem = AVPlayerItem(asset: asset)
                 this.player.replaceCurrentItem(with: this.currentPlayerItem!)
-                
-                if configuration.registerNowPlayingInfoInfoAndRemoteCommandHandlers {
-                    this.registerCommandHandlers()
-                    this.updateArtwork()
-                    this.updateNowPlayingInfo()
-                }
                 
                 this.registerForAudioSessionInterruptionNotification()
             }
@@ -392,22 +355,28 @@ public class PlaybackController: NSObject {
                 to: time.asCMTime,
                 toleranceBefore: kCMTimeZero,
                 toleranceAfter: kCMTimeZero,
-                completionHandler: { [weak self] (finished) in
-                    if finished {
-                        self?.updateNowPlayingInfo()
-                        completion()
-                        self?.post(.didChangePositionTime)
-                    }
+                completionHandler: { [weak self] finished in
+                    guard finished else { return }
+                    completion()
+                    self?.post(.didChangePositionTime)
                 }
             )
         } else {
-            player.seek(to: time.asCMTime) { [weak self] (finished) in
-                if finished {
-                    self?.updateNowPlayingInfo()
-                    self?.post(.didChangePositionTime)
-                }
+            player.seek(to: time.asCMTime) { [weak self] finished in
+                guard finished else { return }
+                self?.post(.didChangePositionTime)
             }
         }
+    }
+    
+    public func beginReceivingRemoteControlEvents() {
+        print("beginReceivingRemoteControlEvents")
+        UIApplication.shared.beginReceivingRemoteControlEvents()
+    }
+    
+    public func endReceivingRemoteControlEvents() {
+        print("endReceivingRemoteControlEvents")
+        UIApplication.shared.endReceivingRemoteControlEvents()
     }
 }
 
@@ -538,8 +507,6 @@ private extension PlaybackController {
                 status = .buffering
             }
         }
-        
-        updateNowPlayingInfo()
     }
     
     func playerDidChangeRate() {
@@ -596,73 +563,10 @@ private extension PlaybackController {
         }
     }
     
-    func updateNowPlayingInfo() {
-        guard let playbackSource = playbackSource, case .audio = playbackSource.type, registerNowPlayingInfoInfoAndRemoteCommandHandlers else {
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-            return
-        }
-        
-        switch playbackSource.type {
-        case .audio(let nowPlayingInfo):
-            
-            guard let nowPlayingInfo = nowPlayingInfo else {
-                MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
-                return
-            }
-            
-            let mediaType = NSNumber(value: MPMediaType.anyAudio.rawValue)
-        
-            var info: [String: Any] = [
-                MPMediaItemPropertyMediaType: mediaType,
-                MPMediaItemPropertyTitle: nowPlayingInfo.title,
-                MPMediaItemPropertyAlbumTitle: nowPlayingInfo.albumTitle,
-                MPMediaItemPropertyArtist: nowPlayingInfo.artist,
-                MPMediaItemPropertyPlaybackDuration: NSNumber(value: duration ?? 0.0),
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: NSNumber(value: elapsedTime),
-                MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: player.rate),
-            ]
-            
-            if let currentArtwork = currentArtwork {
-                if #available(iOS 10.0, *) {
-                    let artwork = MPMediaItemArtwork(boundsSize: currentArtwork.size) { inputSize -> UIImage in
-                        return currentArtwork.draw(at: inputSize)
-                    }
-                    
-                    info[MPMediaItemPropertyArtwork] = artwork
-                }
-            }
-            
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-            
-        case .video:
-            break
-        }
-    }
-    
-    func updateArtwork() {
-        guard let playbackSource = playbackSource else {
-            self.currentArtwork = nil
-            return
-        }
-        
-        switch playbackSource.type {
-        case .audio(let nowPlayingInfo):
-            if let artworkUrl = nowPlayingInfo?.artworkUrl {
-                artworkProvider?.getArtwork(for: artworkUrl) { [weak self] image in
-                    self?.currentArtwork = image
-                }
-            }
-            
-        case .video:
-            break
-        }
-    }
-    
     func removeTimeObserver() {
-        if let timeObserverToken = timeObserverToken {
-            player.removeTimeObserver(timeObserverToken)
-            self.timeObserverToken = nil
-        }
+        guard let timeObserverToken = timeObserverToken else { return }
+        player.removeTimeObserver(timeObserverToken)
+        self.timeObserverToken = nil
     }
 }
 
@@ -672,7 +576,6 @@ private extension PlaybackController {
 fileprivate var PlaybackControllerContext = "PlaybackControllerContext"
 
 extension PlaybackController {
-    
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         
         guard let keyPath = keyPath else { return }
@@ -712,134 +615,3 @@ extension PlaybackController {
         currentPlayerItem?.remove(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
     }
 }
-
-
-// MARK: Remote Commands
-
-extension PlaybackController {
-    func registerCommandHandlers() {
-        guard let playbackSource = playbackSource, case .audio = playbackSource.type else {
-            removeCommandHandlers()
-            return
-        }
-        
-        let center = MPRemoteCommandCenter.shared()
-        
-        // Playback Commands
-        center.playCommand.addTarget(handler: handlePlayCommand)
-        center.pauseCommand.addTarget(handler: handlePauseCommand)
-        center.stopCommand.isEnabled = false
-        center.togglePlayPauseCommand.addTarget(handler: handleTogglePlayPauseCommand)
-        
-        // Changing Tracks
-        center.nextTrackCommand.isEnabled = false
-        center.previousTrackCommand.isEnabled = false
-        
-        // Navigating a Track's Contents
-        center.seekBackwardCommand.isEnabled = false
-        center.seekForwardCommand.isEnabled = false
-        center.skipBackwardCommand.isEnabled = true
-        center.skipForwardCommand.isEnabled = true
-        center.changePlaybackRateCommand.isEnabled = false
-        center.skipBackwardCommand.addTarget(handler: handleSkipBackwardCommand)
-        center.skipForwardCommand.addTarget(handler: handleSkipForwardCommand)
-        center.skipBackwardCommand.preferredIntervals = [NSNumber(value: backwardSkipInterval)]
-        center.skipForwardCommand.preferredIntervals = [NSNumber(value: forwardSkipInterval)]
-        center.changePlaybackPositionCommand.addTarget(handler: handleChangePlaybackPositionCommand)
-        
-        // Other
-        center.ratingCommand.isEnabled = false
-        center.likeCommand.isEnabled = false
-        center.dislikeCommand.isEnabled = false
-        center.bookmarkCommand.isEnabled = false
-    }
-    
-    func removeCommandHandlers() {
-        let center = MPRemoteCommandCenter.shared()
-        
-        center.playCommand.removeTarget(nil)
-        center.pauseCommand.removeTarget(nil)
-        center.togglePlayPauseCommand.removeTarget(nil)
-        center.skipBackwardCommand.removeTarget(nil)
-        center.skipForwardCommand.removeTarget(nil)
-        center.changePlaybackPositionCommand.removeTarget(nil)
-    }
-    
-    func handlePlayCommand(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        switch status {
-        case .playing:
-            return .success
-            
-        case .paused:
-            play()
-            return .success
-            
-        case .idle, .buffering, .preparing(_,_), .error(_):
-            return .noActionableNowPlayingItem
-        }
-    }
-    
-    func handlePauseCommand(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        switch status {
-        case .playing:
-            pause(manually: true)
-            return .success
-            
-        case .paused(_):
-            status = .paused(manually: true)
-            return .success
-            
-        case .idle, .buffering, .preparing(_,_), .error(_):
-            return .noActionableNowPlayingItem
-        }
-    }
-    
-    func handleTogglePlayPauseCommand(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        switch status {
-        case .playing:
-            return handlePauseCommand(event)
-            
-        case .paused:
-            return handlePlayCommand(event)
-            
-        case .idle, .buffering, .preparing(_,_), .error(_):
-            return .noActionableNowPlayingItem
-        }
-    }
-    
-    func handleSkipBackwardCommand(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        switch status {
-        case .playing, .paused, .buffering:
-            skipBackward()
-            return .success
-            
-        case .idle, .preparing(_,_), .error(_):
-            return .noActionableNowPlayingItem
-        }
-    }
-    
-    func handleSkipForwardCommand(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        switch status {
-        case .playing, .paused, .buffering:
-            skipForward()
-            return .success
-            
-        case .idle, .preparing(_,_), .error(_):
-            return .noActionableNowPlayingItem
-        }
-    }
-    
-    func handleChangePlaybackPositionCommand(_ event: MPRemoteCommandEvent) -> MPRemoteCommandHandlerStatus {
-        switch status {
-        case .playing, .paused, .buffering:
-            let positionTime = (event as? MPChangePlaybackPositionCommandEvent)?.positionTime ?? 0.0
-            seekToTime(positionTime, accurately: true)
-            return .success
-            
-        case .idle, .preparing(_,_), .error(_):
-            return .noActionableNowPlayingItem
-        }
-    }
-}
-
-
