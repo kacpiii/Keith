@@ -335,14 +335,14 @@ public class PlaybackController: NSObject {
         isPlayingFromBeginning = true
     }
     
-    public func skipForward() {
+    public func skipForward(completion: @escaping () -> Void = {}) {
         let newTime = elapsedTime + forwardSkipInterval
-        seekToTime(newTime, accurately: true)
+        seekToTime(newTime, accurately: true, completion: completion)
     }
     
-    public func skipBackward() {
+    public func skipBackward(completion: @escaping () -> Void = {}) {
         let newTime = elapsedTime - backwardSkipInterval
-        seekToTime(newTime, accurately: true)
+        seekToTime(newTime, accurately: true, completion: completion)
     }
     
     public func seekToTime(_ time: TimeInterval, accurately: Bool = true, completion: @escaping () -> Void = {}) {
@@ -367,16 +367,6 @@ public class PlaybackController: NSObject {
                 self?.post(.didChangePositionTime)
             }
         }
-    }
-    
-    public func beginReceivingRemoteControlEvents() {
-        print("beginReceivingRemoteControlEvents")
-        UIApplication.shared.beginReceivingRemoteControlEvents()
-    }
-    
-    public func endReceivingRemoteControlEvents() {
-        print("endReceivingRemoteControlEvents")
-        UIApplication.shared.endReceivingRemoteControlEvents()
     }
 }
 
