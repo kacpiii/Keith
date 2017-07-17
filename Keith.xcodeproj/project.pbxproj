@@ -28,7 +28,6 @@
 		08C0FA4A1E2E99550008D4C8 /* TimeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08C0FA491E2E99550008D4C8 /* TimeParser.swift */; };
 		08C0FA4B1E2E9B2B0008D4C8 /* Keith.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 087487301E2CE89B00453D78 /* Keith.framework */; };
 		08C0FA4C1E2E9B2B0008D4C8 /* Keith.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 087487301E2CE89B00453D78 /* Keith.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		08C0FA511E2F97880008D4C8 /* ArtworkProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08C0FA501E2F97880008D4C8 /* ArtworkProvider.swift */; };
 		08C0FA7C1E3127EB0008D4C8 /* URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08C0FA7B1E3127EB0008D4C8 /* URL.swift */; };
 /* End PBXBuildFile section */
 
@@ -88,7 +87,6 @@
 		0874877A1E2D295400453D78 /* VideoPlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoPlayerViewController.swift; sourceTree = "<group>"; };
 		0874877C1E2D349C00453D78 /* PlaybackController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaybackController.swift; sourceTree = "<group>"; };
 		08C0FA491E2E99550008D4C8 /* TimeParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeParser.swift; sourceTree = "<group>"; };
-		08C0FA501E2F97880008D4C8 /* ArtworkProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArtworkProvider.swift; sourceTree = "<group>"; };
 		08C0FA7B1E3127EB0008D4C8 /* URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URL.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -143,7 +141,6 @@
 			isa = PBXGroup;
 			children = (
 				08C0FA541E2FA70D0008D4C8 /* Extensions */,
-				08C0FA501E2F97880008D4C8 /* ArtworkProvider.swift */,
 				082389801EAFD5090009F4BA /* PlaybackConfiguration.swift */,
 				0874877C1E2D349C00453D78 /* PlaybackController.swift */,
 				087487721E2D06B400453D78 /* PlaybackSource.swift */,
@@ -343,7 +340,6 @@
 				087487571E2CEBD600453D78 /* TimeInterval.swift in Sources */,
 				087487561E2CEBD600453D78 /* NSObject.swift in Sources */,
 				087487531E2CEBB800453D78 /* CMTime.swift in Sources */,
-				08C0FA511E2F97880008D4C8 /* ArtworkProvider.swift in Sources */,
 				0874875B1E2CECBB00453D78 /* UIImage.swift in Sources */,
 				087487731E2D06B400453D78 /* PlaybackSource.swift in Sources */,
 				082389811EAFD5090009F4BA /* PlaybackConfiguration.swift in Sources */,

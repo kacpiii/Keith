@@ -25,7 +25,7 @@ public struct NowPlayingInfo {
 }
 
 public enum PlaybackType {
-    case audio(nowPlayingInfo: NowPlayingInfo?)
+    case audio
     case video
     
     public var uti: String {
@@ -45,7 +45,6 @@ public enum SourceType {
 }
 
 public struct PlaybackSource {
-    
     public let url: URL?
     public let asset: AVAsset?
     public let type: PlaybackType
