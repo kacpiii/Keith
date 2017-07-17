@@ -320,16 +320,20 @@ public class PlaybackController: NSObject {
         }
     }
     
-    public func stop() {
+    public func stop(completion: @escaping () -> Void = {}) {
         switch status {
         case .playing, .buffering:
             pause(manually: true)
+            
             seekToTime(0.0, accurately: true) {
                 self.post(.didStopPlayback)
+                completion()
             }
             
         case .paused, .idle, .preparing, .error:
-            seekToTime(0.0, accurately: true)
+            seekToTime(0.0, accurately: true) {
+                completion()
+            }
         }
         
         isPlayingFromBeginning = true
@@ -395,8 +399,9 @@ private extension PlaybackController {
                 queue: .main,
                 using: { [weak self] (note) in
                     guard let this = self else { return }
-                    this.stop()
-                    this.post(.didPlayToEnd)
+                    this.stop {
+                        this.post(.didPlayToEnd)
+                    }
             })
         }
     }
