@@ -510,7 +510,7 @@ private extension PlaybackController {
         switch (player.rate, status) {
         case (stoppedRate, .playing):
             // Rate indicates playback is stopped, but our status doesn't reflect that.
-            status = .paused(manually: true)
+            status = .paused(manually: false)
             
         case (stoppedRate, _):
             // Rate indicates playback is stopped and our status is not playing, so we're good.
