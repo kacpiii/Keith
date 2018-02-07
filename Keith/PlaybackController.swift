@@ -386,7 +386,7 @@ private extension PlaybackController {
     func didSetPlayerItem(oldValue: AVPlayerItem?) {
         oldValue?.remove(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
         currentPlayerItem?.add(observer: self, for: playerItemKeyPaths, context: &PlaybackControllerContext)
-        currentPlayerItem?.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain
+        currentPlayerItem?.audioTimePitchAlgorithm = AVAudioTimePitchAlgorithm.timeDomain
         
         if let observer = currentPlayerItemObserver {
             NotificationCenter.default.removeObserver(observer)

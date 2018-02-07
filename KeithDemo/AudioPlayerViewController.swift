@@ -16,19 +16,18 @@ class AudioPlayerViewController: UIViewController {
     @IBOutlet private weak var durationLabel: UILabel?
     
     private let playbackController = PlaybackController.shared
-    private let artworkProvider = ArtworkProvider()
     
     private lazy var source: PlaybackSource = {
         let nowPlayingInfo = NowPlayingInfo(
-            title: "Title name",
-            albumTitle: "Album name",
+            title: "Title name 1",
+            albumTitle: "Album name 1",
             artist: "Artist name",
             artworkUrl: URL(string: "http://exponent.fm/wp-content/uploads/2014/02/cropped-Exponent-header.png")
         )
         
         let url = URL(string: "http://content.blubrry.com/exponent/exponent86.mp3")!
         let sourceType = SourceType.url(url: url)
-        let type: PlaybackType = .audio(nowPlayingInfo: nowPlayingInfo)
+        let type: PlaybackType = .audio
         let source = PlaybackSource(sourceType: sourceType, type: type)
         
         return source
@@ -41,8 +40,7 @@ class AudioPlayerViewController: UIViewController {
     }
     
     private func setupPlayerStack() {
-        playbackController.artworkProvider = artworkProvider
-        playbackController.prepareToPlay(source)
+        playbackController.prepareToPlay(source, configuration: PlaybackConfiguration.default)
         
         let center = NotificationCenter.default
         
